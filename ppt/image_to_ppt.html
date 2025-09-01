@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerPoint Image Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            min-height: 600px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .radio-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .radio-option input[type="radio"] {
+            margin-right: 10px;
+            accent-color: #667eea;
+        }
+
+        .input-group {
+            margin-top: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .custom-inputs {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .custom-inputs.show {
+            display: grid;
+        }
+
+        .folder-section {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .folder-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .folder-input input {
+            flex: 1;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+        }
+
+        .generate-section {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .btn-generate {
+            font-size: 18px;
+            padding: 15px 40px;
+            margin: 0 10px;
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+
+        .output.show {
+            display: block;
+        }
+
+        .output.error {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .preview {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .drag-drop-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .drag-drop-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0ecff 100%);
+            transform: translateY(-2px);
+        }
+
+        .drag-drop-area.dragover {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
+            transform: scale(1.02);
+        }
+
+        .drag-drop-content h4 {
+            color: #333;
+            margin: 15px 0 10px 0;
+            font-size: 20px;
+        }
+
+        .drag-drop-content p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .drag-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .selected-images {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .selected-images h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .image-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .image-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+
+        .image-item:hover {
+            background: #e9ecef;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .image-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .image-preview {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+            border: 2px solid #ddd;
+        }
+
+        .image-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image-name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .image-size {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .image-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .arrow-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .arrow-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.1);
+        }
+
+        .arrow-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+        }
+
+        .list-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 PowerPoint Image Generator</h1>
+            <p>Create professional PowerPoint presentations with your images</p>
+        </div>
+
+        <div class="section folder-section">
+            <h3>📁 Image Folder Location</h3>
+            <div class="folder-input">
+                <input type="text" id="folderPath" value="C:\Users\NaRPaVi Enterprises\Downloads\" placeholder="Enter folder path...">
+                <button class="btn btn-secondary" onclick="resetFolder()">Reset</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🖼️ Image Selection</h3>
+            
+            <div class="drag-drop-area" id="dragDropArea">
+                <div class="drag-drop-content">
+                    <div class="drag-icon">📁</div>
+                    <h4>Drag & Drop Images Here</h4>
+                    <p>Or click to browse and select multiple image files</p>
+                    <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">Browse Files</button>
+                </div>
+                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+            </div>
+
+            <div class="selected-images" id="selectedImages" style="display: none;">
+                <h4>Selected Images (Drag to reorder or use arrows):</h4>
+                <div class="image-list" id="imageList"></div>
+                <div class="list-controls">
+                    <button class="btn btn-secondary" onclick="clearImages()">Clear All</button>
+                    <button class="btn btn-secondary" onclick="addMoreImages()">Add More Images</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📐 Image Positioning</h3>
+            <div class="radio-group">
+                <div class="radio-option" onclick="selectPosition('background')">
+                    <input type="radio" name="position" value="background" id="background" checked>
+                    <label for="background">Background (Full Slide)</label>
+                </div>
+                <div class="radio-option" onclick="selectPosition('centered')">
+                    <input type="radio" name="position" value="centered" id="centered">
+                    <label for="centered">Centered</label>
+                </div>
+                <div class="radio-option" onclick="selectPosition('topleft')">
+                    <input type="radio" name="position" value="topleft" id="topleft">
+                    <label for="topleft">Top-Left Corner</label>
+                </div>
+                <div class="radio-option" onclick="selectPosition('topright')">
+                    <input type="radio" name="position" value="topright" id="topright">
+                    <label for="topright">Top-Right Corner</label>
+                </div>
+                <div class="radio-option" onclick="selectPosition('bottomleft')">
+                    <input type="radio" name="position" value="bottomleft" id="bottomleft">
+                    <label for="bottomleft">Bottom-Left Corner</label>
+                </div>
+                <div class="radio-option" onclick="selectPosition('bottomright')">
+                    <input type="radio" name="position" value="bottomright" id="bottomright">
+                    <label for="bottomright">Bottom-Right Corner</label>
+                </div>
+                <div class="radio-option" onclick="selectPosition('custom')">
+                    <input type="radio" name="position" value="custom" id="custom">
+                    <label for="custom">Custom Position</label>
+                </div>
+            </div>
+
+            <div class="custom-inputs" id="customInputs">
+                <div class="input-group">
+                    <label>X Position:</label>
+                    <input type="text" id="customX" placeholder="100" value="100">
+                </div>
+                <div class="input-group">
+                    <label>Y Position:</label>
+                    <input type="text" id="customY" placeholder="100" value="100">
+                </div>
+                <div class="input-group">
+                    <label>Width (-1 for original):</label>
+                    <input type="text" id="customWidth" placeholder="400" value="400">
+                </div>
+                <div class="input-group">
+                    <label>Height (-1 for original):</label>
+                    <input type="text" id="customHeight" placeholder="300" value="300">
+                </div>
+            </div>
+        </div>
+
+        <div class="generate-section">
+            <button class="btn btn-generate" onclick="generateCode()">🚀 Generate VBScript</button>
+            <button class="btn btn-generate btn-secondary" onclick="copyToClipboard()">📋 Copy Code</button>
+        </div>
+
+        <div class="output" id="output">
+            <h4>✅ VBScript Generated Successfully!</h4>
+            <p>Copy the code below and save it as a .vbs file, then run it:</p>
+            <div class="code-block" id="codeBlock"></div>
+        </div>
+
+        <div class="preview" id="preview">
+            <h4>📋 Configuration Preview:</h4>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedImageFiles = [];
+        let currentPosition = 'background';
+
+        // Drag and drop functionality
+        function setupDragAndDrop() {
+            const dragArea = document.getElementById('dragDropArea');
+            const fileInput = document.getElementById('fileInput');
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dragArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dragArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dragArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            // Handle dropped files
+            dragArea.addEventListener('drop', handleDrop, false);
+            dragArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFiles);
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight(e) {
+            document.getElementById('dragDropArea').classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            document.getElementById('dragDropArea').classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFileList(files);
+        }
+
+        function handleFiles(e) {
+            const files = e.target.files;
+            handleFileList(files);
+        }
+
+        function handleFileList(files) {
+            const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+            
+            imageFiles.forEach(file => {
+                if (!selectedImageFiles.find(f => f.name === file.name)) {
+                    selectedImageFiles.push({
+                        file: file,
+                        name: file.name,
+                        size: formatFileSize(file.size),
+                        url: URL.createObjectURL(file)
+                    });
+                }
+            });
+            
+            updateImageList();
+            document.getElementById('selectedImages').style.display = 'block';
+            updatePreview();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateImageList() {
+            const imageList = document.getElementById('imageList');
+            imageList.innerHTML = '';
+
+            if (selectedImageFiles.length === 0) {
+                imageList.innerHTML = '<div class="empty-state">No images selected</div>';
+                return;
+            }
+
+            selectedImageFiles.forEach((imageFile, index) => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-item';
+                imageItem.draggable = true;
+                imageItem.dataset.index = index;
+
+                imageItem.innerHTML = `
+                    <img src="${imageFile.url}" alt="${imageFile.name}" class="image-preview">
+                    <div class="image-info">
+                        <div class="image-name">${imageFile.name}</div>
+                        <div class="image-size">${imageFile.size}</div>
+                    </div>
+                    <div class="image-controls">
+                        <button class="arrow-btn" onclick="moveImage(${index}, 'up')" ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="arrow-btn" onclick="moveImage(${index}, 'down')" ${index === selectedImageFiles.length - 1 ? 'disabled' : ''}>↓</button>
+                        <button class="remove-btn" onclick="removeImage(${index})">×</button>
+                    </div>
+                `;
+
+                // Add drag and drop for reordering
+                imageItem.addEventListener('dragstart', handleDragStart);
+                imageItem.addEventListener('dragover', handleDragOver);
+                imageItem.addEventListener('drop', handleImageDrop);
+                imageItem.addEventListener('dragend', handleDragEnd);
+
+                imageList.appendChild(imageItem);
+            });
+        }
+
+        function moveImage(index, direction) {
+            if (direction === 'up' && index > 0) {
+                [selectedImageFiles[index], selectedImageFiles[index - 1]] = [selectedImageFiles[index - 1], selectedImageFiles[index]];
+            } else if (direction === 'down' && index < selectedImageFiles.length - 1) {
+                [selectedImageFiles[index], selectedImageFiles[index + 1]] = [selectedImageFiles[index + 1], selectedImageFiles[index]];
+            }
+            updateImageList();
+            updatePreview();
+        }
+
+        function removeImage(index) {
+            URL.revokeObjectURL(selectedImageFiles[index].url);
+            selectedImageFiles.splice(index, 1);
+            updateImageList();
+            updatePreview();
+            
+            if (selectedImageFiles.length === 0) {
+                document.getElementById('selectedImages').style.display = 'none';
+            }
+        }
+
+        function clearImages() {
+            selectedImageFiles.forEach(img => URL.revokeObjectURL(img.url));
+            selectedImageFiles = [];
+            updateImageList();
+            document.getElementById('selectedImages').style.display = 'none';
+            updatePreview();
+        }
+
+        function addMoreImages() {
+            document.getElementById('fileInput').click();
+        }
+
+        // Drag and drop reordering
+        let draggedIndex = null;
+
+        function handleDragStart(e) {
+            draggedIndex = parseInt(e.target.dataset.index);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleImageDrop(e) {
+            e.preventDefault();
+            const dropIndex = parseInt(e.target.closest('.image-item').dataset.index);
+            
+            if (draggedIndex !== null && draggedIndex !== dropIndex) {
+                const draggedItem = selectedImageFiles[draggedIndex];
+                selectedImageFiles.splice(draggedIndex, 1);
+                selectedImageFiles.splice(dropIndex, 0, draggedItem);
+                updateImageList();
+                updatePreview();
+            }
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedIndex = null;
+        }
+
+        function selectPosition(position) {
+            currentPosition = position;
+            
+            // Update radio selection
+            document.querySelectorAll('input[name="position"]').forEach(radio => {
+                radio.checked = radio.value === position;
+            });
+            
+            // Show/hide custom inputs
+            const customInputs = document.getElementById('customInputs');
+            if (position === 'custom') {
+                customInputs.classList.add('show');
+            } else {
+                customInputs.classList.remove('show');
+            }
+            
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const preview = document.getElementById('preview');
+            const previewContent = document.getElementById('previewContent');
+            
+            let imageSelection = '';
+            if (selectedImageFiles.length === 0) {
+                imageSelection = 'No images selected';
+            } else if (selectedImageFiles.length === 1) {
+                imageSelection = `Single image: ${selectedImageFiles[0].name}`;
+            } else {
+                imageSelection = `${selectedImageFiles.length} images selected: ${selectedImageFiles.map(f => f.name).join(', ')}`;
+            }
+            
+            let positionInfo = '';
+            switch(currentPosition) {
+                case 'background':
+                    positionInfo = 'Background (fills entire slide)';
+                    break;
+                case 'centered':
+                    positionInfo = 'Centered on slide';
+                    break;
+                case 'topleft':
+                    positionInfo = 'Top-left corner';
+                    break;
+                case 'topright':
+                    positionInfo = 'Top-right corner';
+                    break;
+                case 'bottomleft':
+                    positionInfo = 'Bottom-left corner';
+                    break;
+                case 'bottomright':
+                    positionInfo = 'Bottom-right corner';
+                    break;
+                case 'custom':
+                    const x = document.getElementById('customX').value || '100';
+                    const y = document.getElementById('customY').value || '100';
+                    const w = document.getElementById('customWidth').value || '400';
+                    const h = document.getElementById('customHeight').value || '300';
+                    positionInfo = `Custom position: X=${x}, Y=${y}, Width=${w}, Height=${h}`;
+                    break;
+            }
+            
+            const folderPath = document.getElementById('folderPath').value;
+            
+            previewContent.innerHTML = `
+                <strong>Output Folder:</strong> ${folderPath}<br>
+                <strong>Images:</strong> ${imageSelection}<br>
+                <strong>Position:</strong> ${positionInfo}<br>
+                <strong>Slides to create:</strong> ${selectedImageFiles.length}
+            `;
+            
+            preview.style.display = 'block';
+        }
+
+        function generateCode() {
+            if (selectedImageFiles.length === 0) {
+                document.getElementById('output').innerHTML = '<h4 style="color: #dc3545;">❌ Error</h4><p>Please select at least one image file first!</p>';
+                document.getElementById('output').classList.add('show', 'error');
+                return;
+            }
+
+            const folderPath = document.getElementById('folderPath').value;
+            
+            // Generate VBScript code
+            let vbsCode = `' Generated PowerPoint Image Presentation Script
+' Created by PowerPoint Image Generator
+
+Option Explicit
+
+Dim pptApp, pptPres, slide, fso
+Dim slideWidth, slideHeight
+Dim imgPath, imgShape
+
+' Initialize objects
+Set fso = CreateObject("Scripting.FileSystemObject")
+
+On Error Resume Next
+
+' Create PowerPoint application
+Set pptApp = CreateObject("PowerPoint.Application")
+If Err.Number <> 0 Then
+    WScript.Echo "Error: Could not create PowerPoint application."
+    WScript.Quit
+End If
+
+pptApp.Visible = True
+Set pptPres = pptApp.Presentations.Add
+
+slideWidth = pptPres.PageSetup.SlideWidth
+slideHeight = pptPres.PageSetup.SlideHeight
+
+WScript.Echo "Creating PowerPoint presentation with ${selectedImageFiles.length} slides..."
+
+`;
+
+            // Add slides for each selected image
+            selectedImageFiles.forEach((imageFile, index) => {
+                // Use the original filename but assume user will copy images to the output folder
+                const imageName = imageFile.name;
+                
+                vbsCode += `
+' Slide ${index + 1} - ${imageName}
+imgPath = "${folderPath}${imageName}"
+If fso.FileExists(imgPath) Then
+    Set slide = pptPres.Slides.Add(${index + 1}, 12)
+    `;
+                
+                // Add positioning code based on selection
+                switch(currentPosition) {
+                    case 'background':
+                        vbsCode += `    slide.FollowMasterBackground = False
+    slide.Background.Fill.UserPicture imgPath
+    WScript.Echo "Added slide ${index + 1} with background image ${imageName}"`;
+                        break;
+                    case 'centered':
+                        vbsCode += `    Set imgShape = slide.Shapes.AddPicture(imgPath, False, True, 0, 0, -1, -1)
+    With imgShape
+        .LockAspectRatio = True
+        If .Width > slideWidth Or .Height > slideHeight Then
+            If .Width / slideWidth > .Height / slideHeight Then
+                .Width = slideWidth * 0.9
+            Else
+                .Height = slideHeight * 0.9
+            End If
+        End If
+        .Left = (slideWidth - .Width) / 2
+        .Top = (slideHeight - .Height) / 2
+    End With
+    WScript.Echo "Added slide ${index + 1} with centered image ${imageName}"`;
+                        break;
+                    case 'topleft':
+                        vbsCode += `    Set imgShape = slide.Shapes.AddPicture(imgPath, False, True, 20, 20, slideWidth * 0.4, slideHeight * 0.4)
+    WScript.Echo "Added slide ${index + 1} with top-left image ${imageName}"`;
+                        break;
+                    case 'topright':
+                        vbsCode += `    Set imgShape = slide.Shapes.AddPicture(imgPath, False, True, slideWidth * 0.55, 20, slideWidth * 0.4, slideHeight * 0.4)
+    WScript.Echo "Added slide ${index + 1} with top-right image ${imageName}"`;
+                        break;
+                    case 'bottomleft':
+                        vbsCode += `    Set imgShape = slide.Shapes.AddPicture(imgPath, False, True, 20, slideHeight * 0.55, slideWidth * 0.4, slideHeight * 0.4)
+    WScript.Echo "Added slide ${index + 1} with bottom-left image ${imageName}"`;
+                        break;
+                    case 'bottomright':
+                        vbsCode += `    Set imgShape = slide.Shapes.AddPicture(imgPath, False, True, slideWidth * 0.55, slideHeight * 0.55, slideWidth * 0.4, slideHeight * 0.4)
+    WScript.Echo "Added slide ${index + 1} with bottom-right image ${imageName}"`;
+                        break;
+                    case 'custom':
+                        const x = document.getElementById('customX').value || '100';
+                        const y = document.getElementById('customY').value || '100';
+                        const w = document.getElementById('customWidth').value || '400';
+                        const h = document.getElementById('customHeight').value || '300';
+                        vbsCode += `    Set imgShape = slide.Shapes.AddPicture(imgPath, False, True, ${x}, ${y}, ${w}, ${h})
+    WScript.Echo "Added slide ${index + 1} with custom positioned image ${imageName}"`;
+                        break;
+                }
+                
+                vbsCode += `
+Else
+    WScript.Echo "Warning: Image file not found: " & imgPath
+End If
+`;
+            });
+
+            vbsCode += `
+' Save presentation
+Dim saveChoice
+saveChoice = MsgBox("Do you want to save the presentation?", vbYesNo, "Save Presentation")
+If saveChoice = vbYes Then
+    Dim savePath
+    savePath = "${folderPath}ImagePresentation.pptx"
+    pptPres.SaveAs savePath
+    WScript.Echo "Presentation saved as: " & savePath
+End If
+
+WScript.Echo "Script completed successfully!"
+WScript.Echo "NOTE: Make sure all selected images are copied to: ${folderPath}"
+
+' Clean up
+Set slide = Nothing
+Set imgShape = Nothing
+Set pptPres = Nothing
+Set pptApp = Nothing
+Set fso = Nothing`;
+
+            // Display the generated code
+            document.getElementById('codeBlock').textContent = vbsCode;
+            document.getElementById('output').classList.add('show');
+            document.getElementById('output').classList.remove('error');
+            
+            // Store code for copying
+            window.generatedCode = vbsCode;
+        }
+
+        function copyToClipboard() {
+            if (window.generatedCode) {
+                navigator.clipboard.writeText(window.generatedCode).then(() => {
+                    alert('✅ Code copied to clipboard!');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = window.generatedCode;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('✅ Code copied to clipboard!');
+                });
+            } else {
+                alert('⚠️ Please generate the code first!');
+            }
+        }
+
+        function resetFolder() {
+            document.getElementById('folderPath').value = "C:\\Users\\NaRPaVi Enterprises\\Downloads\\";
+            updatePreview();
+        }
+
+        // Initialize the interface
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDragAndDrop();
+            selectPosition('background');
+            updatePreview();
+            
+            // Add event listeners for input changes
+            document.getElementById('folderPath').addEventListener('input', updatePreview);
+            document.getElementById('customX').addEventListener('input', updatePreview);
+            document.getElementById('customY').addEventListener('input', updatePreview);
+            document.getElementById('customWidth').addEventListener('input', updatePreview);
+            document.getElementById('customHeight').addEventListener('input', updatePreview);
+        });
+    </script>
+</body>
+</html>
